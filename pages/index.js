@@ -3,8 +3,8 @@ import styles from "../styles/Home.module.css"
  
 import { useStoryblokState, getStoryblokApi, StoryblokComponent } from "@storyblok/react"
  
-export default function Home({story}) {
-  story = useStoryblokState(story);
+export default function Home({ story, preview }) {
+  story = useStoryblokState(story, {}, preview);
 
   return (
     <div className={styles.container}>
@@ -24,12 +24,16 @@ export default function Home({story}) {
   )
 }
  
-export async function getStaticProps() {
+export async function getStaticProps(context) {
   // home is the default slug for the homepage in Storyblok
   let slug = "home"
  
   let sbParams = {
-    version: "draft",
+    version: "published",
+  };
+ 
+  if (context.preview) {
+    sbParams.version = "draft";
   }
  
   const storyblokApi = getStoryblokApi();
@@ -39,6 +43,7 @@ export async function getStaticProps() {
     props: {
       story: data ? data.story : false,
       key: data ? data.story.id : false,
+      preview: context.preview || false,
     },
     revalidate: 3600, // revalidate every hour
   };
